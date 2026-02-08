@@ -25,16 +25,29 @@
     <script>
         const btn = document.getElementById('connect-btn');
         const status = document.getElementById('status');
-        let rxCharacteristic, txCharacteristic;
+        let device, rxCharacteristic, txCharacteristic;
         
+        async function onDisconnected() {
+            status.className = "";
+            status.innerText = "DISCONNECTED. RECONNECTING...";
+            btn.style.display = "block";
+            try {
+                await device.gatt.connect();
+            } catch (e) {
+                status.innerText = "LOST CONNECTION. TAP LINK TO RETRY.";
+            }
+        }
+
         btn.onclick = async () => {
             try {
                 status.innerText = "SCANNING FOR FRAME...";
-                const device = await navigator.bluetooth.requestDevice({
+                device = await navigator.bluetooth.requestDevice({
                     filters: [{ namePrefix: 'Frame' }],
                     optionalServices: ['7a230001-5475-a6a4-654c-8431f6ad49c4']
                 });
                 
+                device.addEventListener('gattserverdisconnected', onDisconnected);
+
                 status.innerText = "CONNECTING TO " + device.name.toUpperCase() + "...";
                 const server = await device.gatt.connect();
                 const service = await server.getPrimaryService('7a230001-5475-a6a4-654c-8431f6ad49c4');
@@ -43,32 +56,21 @@
                 rxCharacteristic = await service.getCharacteristic('7a230003-5475-a6a4-654c-8431f6ad49c4');
                 
                 status.className = "status-active";
-                status.innerText = "LINKED: " + device.name.toUpperCase() + ". LISTENING TO TOMMY...";
+                status.innerText = "LINKED: " + device.name.toUpperCase() + ". SYSTEM STABLE.";
                 btn.style.display = "none";
                 
-                // Start polling Tommy for commands
-                setInterval(pollTommy, 2000);
+                // Keep-alive: send a break signal every 15s to prevent sleep
+                setInterval(async () => {
+                    if (txCharacteristic) {
+                        try { await txCharacteristic.writeValue(new Uint8Array([0x03])); } catch(e) {}
+                    }
+                }, 15000);
                 
             } catch (err) {
                 status.innerText = "ERROR: " + err.message.toUpperCase();
                 console.error(err);
             }
         };
-
-        let lastTs = 0;
-        async function pollTommy() {
-            try {
-                // Here we fetch from Tommy's workspace via a proxy or direct link if available
-                // For now, we simulate receiving a command
-                console.log("Polling Tommy...");
-            } catch (e) {}
-        }
-
-        async function sendToFrame(text) {
-            if (!txCharacteristic) return;
-            const encoder = new TextEncoder();
-            await txCharacteristic.writeValue(encoder.encode(text));
-        }
     </script>
 </body>
 </html>
