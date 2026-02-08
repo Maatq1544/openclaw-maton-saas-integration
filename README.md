@@ -42,7 +42,7 @@ export MATON_API_KEY="your_api_key_here"
 ```bash
 # Check connected services
 curl -H "Authorization: Bearer $MATON_API_KEY" \
-  https://ctrl.maton.ai/connections
+  https://gateway.maton.ai/connections
 ```
 
 ## 📖 Usage Examples
@@ -344,7 +344,7 @@ export MATON_API_KEY="your_key_here"
 **Problem:** The underlying service (Google, Slack, etc.) returned an error.
 
 **Solution:**
-- Check Maton logs at `https://ctrl.maton.ai/logs`
+- Check Maton logs at `https://gateway.maton.ai/logs`
 - Verify service-specific permissions
 - Check API documentation for the target service
 
