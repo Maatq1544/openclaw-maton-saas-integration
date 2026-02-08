@@ -1,0 +1,57 @@
+# OpenClaw Security - .gitignore template
+
+# API Keys and Tokens
+*.key
+*.token
+*_api_key*
+*_token*
+.env
+.env.local
+.env.*.local
+
+# OpenClaw configs with secrets
+openclaw.json
+openclaw.json.bak*
+config.json
+credentials/
+
+# Maton
+maton_key.txt
+maton-credentials.json
+
+# GitHub
+github_token.txt
+.github-token
+
+# Telegram
+telegram_token.txt
+.tg/
+
+# SSH keys
+*.pem
+*.ppk
+id_rsa*
+id_ed25519*
+
+# Logs with potential secrets
+*.log
+logs/
+*.jsonl
+
+# Local development
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+node_modules/
+package-lock.json
+
+# Sensitive data
+btc_data/
+data/
+*.db
+*.sqlite
+
+# Backups
+*.bak
+backup/
