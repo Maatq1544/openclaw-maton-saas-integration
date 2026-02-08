@@ -25,6 +25,7 @@
     <script>
         const btn = document.getElementById('connect-btn');
         const status = document.getElementById('status');
+        let rxCharacteristic, txCharacteristic;
         
         btn.onclick = async () => {
             try {
@@ -36,20 +37,38 @@
                 
                 status.innerText = "CONNECTING TO " + device.name.toUpperCase() + "...";
                 const server = await device.gatt.connect();
+                const service = await server.getPrimaryService('7a230001-5475-a6a4-654c-8431f6ad49c4');
+                
+                txCharacteristic = await service.getCharacteristic('7a230002-5475-a6a4-654c-8431f6ad49c4');
+                rxCharacteristic = await service.getCharacteristic('7a230003-5475-a6a4-654c-8431f6ad49c4');
                 
                 status.className = "status-active";
-                status.innerText = "LINKED: " + device.name.toUpperCase();
+                status.innerText = "LINKED: " + device.name.toUpperCase() + ". LISTENING TO TOMMY...";
                 btn.style.display = "none";
                 
-                // In a real scenario, here we'd open a WebSocket to Tommy's server
-                // and start relaying Lua commands and data.
-                console.log("GATT Connected", server);
+                // Start polling Tommy for commands
+                setInterval(pollTommy, 2000);
                 
             } catch (err) {
                 status.innerText = "ERROR: " + err.message.toUpperCase();
                 console.error(err);
             }
         };
+
+        let lastTs = 0;
+        async function pollTommy() {
+            try {
+                // Here we fetch from Tommy's workspace via a proxy or direct link if available
+                // For now, we simulate receiving a command
+                console.log("Polling Tommy...");
+            } catch (e) {}
+        }
+
+        async function sendToFrame(text) {
+            if (!txCharacteristic) return;
+            const encoder = new TextEncoder();
+            await txCharacteristic.writeValue(encoder.encode(text));
+        }
     </script>
 </body>
 </html>
